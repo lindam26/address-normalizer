@@ -7,10 +7,11 @@ you're trying to deduplicate addresses or match them against a reference
 list, that inconsistency is the whole problem.
 
 `addrnorm` takes address lines and rewrites them to a consistent form:
-uppercase, single spaces, spelled-out directionals and street suffixes
-collapsed to their USPS abbreviations. It doesn't validate that an address
-exists or geocode anything - it just makes equivalent input look the same,
-so string comparison and deduplication actually work.
+uppercase, single spaces, spelled-out directionals, street suffixes, and
+secondary unit designators (Apartment, Suite, Unit, ...) collapsed to their
+USPS abbreviations. It doesn't validate that an address exists or geocode
+anything - it just makes equivalent input look the same, so string
+comparison and deduplication actually work.
 
 ## Usage
 
@@ -36,9 +37,10 @@ addrnorm north.txt south.txt > combined.txt
 Example:
 
 ```
-$ printf '123 North Main Street\n456 west  elm avenue,\n' | addrnorm
+$ printf '123 North Main Street\n456 west  elm avenue,\n789 Oak Dr Apartment 4B\n' | addrnorm
 123 N MAIN ST
 456 W ELM AVE
+789 OAK DR APT 4B
 ```
 
 Blank lines are skipped. Each input line is treated as one address line -

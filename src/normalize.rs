@@ -35,6 +35,30 @@ const DIRECTIONALS: &[(&str, &str)] = &[
     ("SOUTHWEST", "SW"),
 ];
 
+const SECONDARY_UNIT_DESIGNATORS: &[(&str, &str)] = &[
+    ("APARTMENT", "APT"),
+    ("BASEMENT", "BSMT"),
+    ("BUILDING", "BLDG"),
+    ("DEPARTMENT", "DEPT"),
+    ("FLOOR", "FL"),
+    ("FRONT", "FRNT"),
+    ("HANGAR", "HNGR"),
+    ("LOBBY", "LBBY"),
+    ("LOWER", "LOWR"),
+    ("OFFICE", "OFC"),
+    ("PENTHOUSE", "PH"),
+    ("PIER", "PIER"),
+    ("REAR", "REAR"),
+    ("ROOM", "RM"),
+    ("SLIP", "SLIP"),
+    ("SPACE", "SPC"),
+    ("STOP", "STOP"),
+    ("SUITE", "STE"),
+    ("TRAILER", "TRLR"),
+    ("UNIT", "UNIT"),
+    ("UPPER", "UPPR"),
+];
+
 fn lookup(table: &[(&str, &str)], token: &str) -> Option<&'static str> {
     table
         .iter()
@@ -43,9 +67,9 @@ fn lookup(table: &[(&str, &str)], token: &str) -> Option<&'static str> {
 }
 
 /// Normalizes a single address line: uppercases, collapses whitespace, and
-/// swaps spelled-out street suffixes and directionals for their USPS
-/// abbreviations so that "123 North Main Street" and "123 N Main St" compare
-/// equal downstream.
+/// swaps spelled-out street suffixes, directionals, and secondary unit
+/// designators for their USPS abbreviations so that "123 North Main Street
+/// Apartment 4" and "123 N Main St Apt 4" compare equal downstream.
 pub fn normalize_line(line: &str) -> String {
     let words: Vec<String> = line
         .split_whitespace()
@@ -56,6 +80,7 @@ pub fn normalize_line(line: &str) -> String {
             let upper = trimmed.to_uppercase();
             lookup(&STREET_SUFFIXES, &upper)
                 .or_else(|| lookup(&DIRECTIONALS, &upper))
+                .or_else(|| lookup(&SECONDARY_UNIT_DESIGNATORS, &upper))
                 .map(str::to_string)
                 .unwrap_or(upper)
         })
@@ -90,5 +115,19 @@ mod tests {
     #[test]
     fn leaves_already_abbreviated_input_alone() {
         assert_eq!(normalize_line("123 Main St"), "123 MAIN ST");
+    }
+
+    #[test]
+    fn abbreviates_secondary_unit_designator() {
+        assert_eq!(
+            normalize_line("123 Main Street Apartment 4B"),
+            "123 MAIN ST APT 4B"
+        );
+    }
+
+    #[test]
+    fn abbreviates_suite_and_unit() {
+        assert_eq!(normalize_line("456 Elm Ave Suite 200"), "456 ELM AVE STE 200");
+        assert_eq!(normalize_line("789 Oak Dr Unit 3"), "789 OAK DR UNIT 3");
     }
 }
