@@ -44,9 +44,26 @@ $ printf '123 North Main Street\n456 west  elm avenue,\n789 Oak Dr Apartment 4B\
 TRENTON NJ
 ```
 
-Blank lines are skipped. Each input line is treated as one address line -
-this version does not parse a full multi-line address block into
-street/city/state/zip fields yet.
+Blank lines are skipped. Each input line is treated as one address line.
+
+## Multi-line blocks
+
+Real address input is often one entry per several lines rather than one
+per line - a street line (or two, if there's a suite/apartment line)
+followed by a "City, ST ZIP" line, with a blank line before the next
+entry. Pass `--blocks` to parse that shape into street/city/state/zip
+fields instead of normalizing each line on its own:
+
+```
+$ printf '123 Main St\nApt 4B\nSpringfield, Illinois 62701\n\n456 Elm Ave\nTrenton, New Jersey\n' | addrnorm --blocks
+123 MAIN ST APT 4B, SPRINGFIELD IL 62701
+456 ELM AVE, TRENTON NJ
+```
+
+The last line of a block is checked for a trailing state and/or zip;
+everything before it is joined as the street. If the last line doesn't
+resolve to a known state or zip, the whole block is treated as street
+with no locality found.
 
 ## Building
 

@@ -120,6 +120,13 @@ fn lookup(table: &[(&str, &str)], token: &str) -> Option<&'static str> {
         .map(|(_, short)| *short)
 }
 
+/// True if `token` is already a USPS state/territory abbreviation (e.g.
+/// "NJ"). Used by the block parser to recognize a locality line's tail
+/// without re-deriving the abbreviation list.
+pub fn is_state_abbr(token: &str) -> bool {
+    STATES.iter().any(|(_, abbr)| *abbr == token)
+}
+
 // State names are matched as a run of consecutive words rather than a
 // single token, since entries like "NEW YORK" and "DISTRICT OF COLUMBIA"
 // span more than one word. Longest match wins so "NEW YORK" isn't cut down
