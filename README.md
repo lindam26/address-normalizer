@@ -65,6 +65,19 @@ everything before it is joined as the street. If the last line doesn't
 resolve to a known state or zip, the whole block is treated as street
 with no locality found.
 
+## Deduplication
+
+Pass `--dedupe` to drop lines that normalize to something already seen,
+keeping only the first occurrence. It works in both line and `--blocks`
+mode, and one seen-set spans every file given on the command line (plus
+stdin), so a repeat across files still gets caught:
+
+```
+$ printf '123 North Main Street\n123 Main St\n456 Elm Ave\n' | addrnorm --dedupe
+123 N MAIN ST
+456 ELM AVE
+```
+
 ## Building
 
 Standard library only, no dependencies:
